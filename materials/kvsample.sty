@@ -1,0 +1,19 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{kvsample}[2021/11/27 kvsample]
+
+\RequirePackage{kvoptions}
+\SetupKeyvalOptions{
+  family=kvsample,
+  prefix=kvsample@
+}
+
+\DeclareBoolOption{active}
+
+\DeclareBoolOption{final}
+\DeclareComplementaryOption{draft}{final}
+
+\DeclareStringOption[initial]{key}
+
+\ProcessKeyvalOptions{kvsample}
+
+% 위 옵션들을 사용하여 실용적인 매크로를 정의한다.

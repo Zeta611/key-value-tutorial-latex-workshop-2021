@@ -1,0 +1,27 @@
+\documentclass{article}
+
+\usepackage{keyval}
+
+\makeatletter
+% 매크로에 값 저장하기
+\define@key{fam}{name}{\def\fam@name{#1}}
+% 초기값 설정하기
+\def\fam@name{\TeX}
+\define@key{fam}{name}{%
+  \def\fam@name{#1}%
+}
+% 기본값 설정하기 (!= 초기값)
+\define@key{fam}{name}[unknown]{%
+  \def\fam@name{#1}%
+}
+
+\newcommand{\hello}{Hello, \fam@name!}
+\makeatother
+
+\begin{document}
+\hello
+\setkeys{fam}{name}
+\hello
+\setkeys{fam}{name = \LaTeX}
+\hello
+\end{document}

@@ -1,0 +1,58 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{xmph}[2021/11/22 v1.0 Extended emph]
+
+\RequirePackage{color,kvoptions}
+\SetupKeyvalOptions{
+  family=xmph,
+  prefix=xmph@
+}
+
+\DeclareBoolOption{useitalic}
+\DeclareBoolOption{usebold}
+
+\DeclareBoolOption{usecolour}
+\DeclareBoolOption{usecolor}
+\let\KV@xmph@usecolor\KV@xmph@usecolour
+
+\DeclareStringOption{colour}
+\define@key{xmph}{color}{\setkeys{xmph}{colour=#1}}
+\DeclareVoidOption{inactive}{%
+  \PackageInfo{xmph}{Package inactive}%
+  \AtEndOfPackage{\let\xmph\emph}%
+}
+\setkeys{xmph}{useitalic,colour=red}
+\ProcessKeyvalOptions{xmph}
+
+\define@key{xmph}{inactive}{%
+  \PackageInfo{xmph}{Package inactive}
+  \let\xmph\emph
+}
+\AtBeginDocument{
+  \DisableKeyvalOption[
+    action=warning,
+    package=xmph
+  ]{xmph}{inactive}
+}
+\newcommand*{\xmphsetup}{\setkeys{xmph}}
+
+% User macros
+\providecommand*{\xmph}[1]{%
+  \xmph@emph{\xmph@bold{%
+    {\xmph@colourtext{#1}}}}%
+}
+\newcommand*{\xmph@emph}{%
+  \ifxmph@useitalic\expandafter\emph
+  \else\expandafter\@firstofone
+  \fi%
+}
+\newcommand*{\xmph@bold}{%
+  \ifxmph@usebold\expandafter\textbf
+  \else\expandafter\@firstofone
+  \fi%
+}
+\newcommand*{\xmph@colourtext}{%
+  \ifxmph@usecolour\expandafter\textcolor
+  \else\expandafter\@secondoftwo
+  \fi
+  {\xmph@colour}%
+}

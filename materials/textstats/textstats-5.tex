@@ -1,0 +1,153 @@
+\documentclass[a4paper,10pt]{article}
+
+\ExplSyntaxOn
+\cs_generate_variant:Nn \tl_count_tokens:n { V }
+
+\prop_new:N \l_id_stats_prop
+
+\keys_define:nn { textstats }
+  {
+    show .bool_set:N = \l_show_text_bool,
+    show .default:n = true,
+    show .initial:n = true,
+
+    hide .bool_set_inverse:N = \l_show_text_bool,
+    hide .default:n = true,
+    hide .initial:n = false,
+
+    id .tl_set:N = \l_block_id_tl,
+    id .value_required:n = true,
+    id .initial:n = default,
+  }
+
+\NewDocumentCommand \textstats { o m }
+  {
+    % If optional key-value arguments are given:
+    \IfValueT { #1 }
+      {
+        \keys_set:nn { textstats } { #1 }
+      }
+
+    \tl_set:Nn \l_tmpa_tl { #2 }
+
+    % Count characters
+    \int_set:Nn \l_tmpa_int
+      { \tl_count_tokens:V \l_tmpa_tl }
+
+    % Count words
+    \seq_set_split:NnV \l_tmpa_seq { ~ } \l_tmpa_tl
+    \int_set:Nn \l_tmpb_int
+      { \seq_count:N \l_tmpa_seq }
+
+    % Save into the DB
+    \prop_put:NVn \l_id_stats_prop \l_block_id_tl
+      { \int_use:N \l_tmpa_int, \int_use:N \l_tmpb_int }
+
+    \bool_if:NT \l_show_text_bool { \tl_use:N \l_tmpa_tl }
+  }
+
+\keys_define:nn { showstats }
+  {
+    show .multichoice:,
+    show / chars .code:n = \bool_set_true:N \l_show_chars_bool,
+    show / words .code:n = \bool_set_true:N \l_show_words_bool,
+    show / time .code:n = \bool_set_true:N \l_show_time_bool,
+
+    time .multichoice:,
+    time / read .code:n = \bool_set_true:N \l_time_read_bool,
+    time / speak .code:n = \bool_set_true:N \l_time_speak_bool,
+
+    wpm / read .fp_set:N = \l_wpm_read_fp,
+    wpm / speak .fp_set:N = \l_wpm_speak_fp,
+  }
+
+\NewDocumentCommand \showstats { D<>{default} o }
+  {
+    \bool_set_false:N \l_show_chars_bool
+    \bool_set_false:N \l_show_words_bool
+    \bool_set_false:N \l_show_time_bool
+    \bool_set_false:N \l_time_read_bool
+    \bool_set_false:N \l_time_speak_bool
+    \fp_set:Nn \l_wpm_read_fp { 250 }
+    \fp_set:Nn \l_wpm_speak_fp { 130 }
+
+    \IfValueTF { #2 }
+      {
+        \keys_set:nn { showstats } { #2 }
+      }
+      {
+        \keys_set:nn { showstats }
+        {
+          show = { words, time },
+          time = { read },
+        }
+      }
+
+    \prop_get:NnN \l_id_stats_prop { #1 } \l_tmpa_tl
+    \clist_set:NV \l_tmpa_clist \l_tmpa_tl
+
+    % Character count
+    \clist_pop:NN \l_tmpa_clist \l_tmpa_tl
+    % Word count
+    \clist_pop:NN \l_tmpa_clist \l_tmpb_tl
+
+    (
+    \bool_if:NT \l_show_chars_bool
+      { \tl_use:N \l_tmpa_tl{}~chars,~ }
+    \bool_if:NT \l_show_words_bool
+      { \tl_use:N \l_tmpb_tl{}~words,~ }
+    \bool_if:NT \l_show_time_bool
+      {
+        \bool_if:NT \l_time_read_bool
+          {
+            \fp_eval:n
+              { round ( \l_tmpb_tl / \l_wpm_read_fp , 2 ) }
+            {}~min~reading~time,~
+          }
+        \bool_if:NT \l_time_speak_bool
+          {
+            \fp_eval:n
+              { round ( \l_tmpb_tl / \l_wpm_speak_fp , 2 ) }
+            {}~min~speaking~time,~
+          }
+      }
+    )
+  }
+
+\ExplSyntaxOff
+
+\begin{document}
+%%% USAGE %%%
+% Shows number of characters and words in a text.
+% Optionally, it can show the time it takes to read--both silently and out loud.
+%
+% 'Record':
+% \textstats[id=<id>, show=<bool>, hide=<bool>]{<text>}
+%
+% Show stats:
+% \showstats{id=<id>, show={chars, words, time}, time={read, speak}, wpm/read=250, wpm/speak=130}
+
+\textstats[hide=true, show=true]{
+  Beautiful is better than ugly.
+  Explicit is better than implicit.
+  Simple is better than complex.
+  Complex is better than complicated.
+  Flat is better than nested.
+  Sparse is better than dense.
+  Readability counts.
+  Special cases aren't special enough to break the rules.
+  Although practicality beats purity.
+  Errors should never pass silently.
+  Unless explicitly silenced.
+  In the face of ambiguity, refuse the temptation to guess.
+  There should be one-- and preferably only one --obvious way to do it.
+  Although that way may not be obvious at first unless you're Dutch.
+  Now is better than never.
+  Although never is often better than *right* now.
+  If the implementation is hard to explain, it's a bad idea.
+  If the implementation is easy to explain, it may be a good idea.
+  Namespaces are one honking great idea -- let's do more of those!
+}
+\showstats<default>[show=time, time=read, wpm / read = 200]
+\showstats[show=time, time=read]
+\end{document}

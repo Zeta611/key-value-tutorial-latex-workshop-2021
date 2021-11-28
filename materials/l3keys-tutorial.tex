@@ -1,0 +1,82 @@
+\documentclass[a4paper]{article}
+
+\ExplSyntaxOn
+\keys_define:nn { module } {
+  key-one .tl_set:N = \l_module_tl,
+  key-two .tl_gset:N = \g_module_tl,
+}
+\ExplSyntaxOff
+
+\begin{document}
+\noindent
+\ExplSyntaxOn
+% set keys
+\keys_set:nn { module } {
+  key-one = ltext1,
+  key-two = gtext1
+}
+
+{
+  \keys_set:nn { module } {
+    key-one = ltext2,
+    key-two = gtext2
+  }
+  \verb/\l_module_tl/:~\l_module_tl\\
+  \verb/\g_module_tl/:~\g_module_tl\\
+}
+\verb/\l_module_tl/:~\l_module_tl\\
+\verb/\g_module_tl/:~\g_module_tl\\
+
+\\
+% edef expansion
+\keys_define:nn { module } {
+  key-three .tl_set_x:N = \l_module_tl,
+  key-four .tl_gset_x:N = \g_module_tl,
+}
+\tl_set:Nn \l_tmp_tl { text }
+\keys_set:nn { module } {
+  key-three = \l_tmp_tl,
+  key-four = \l_tmp_tl,
+}
+\tl_set:Nn \l_tmp_tl { changed }
+\verb/\l_module_tl/:~\l_module_tl\\
+\verb/\g_module_tl/:~\g_module_tl\\
+\verb/\l_tmp_tl/:~\l_tmp_tl\\
+
+\\
+% default values
+\keys_define:nn { module } {
+  key-five .code:n = Do~stuff~with~#1!,
+  key-five .default:n = yes,
+}
+\keys_set:nn { module } { key-five }\\
+
+\\
+% choices
+\keys_define:nn { module }
+  {
+    key-six .choices:nn =
+      { choice-a, choice-b, choice-c }
+      {
+        Do~something~using~either~
+        \tl_use:N \l_keys_choice_tl{}~or~
+        \int_use:N \l_keys_choice_int.
+      }
+  }
+\keys_set:nn { module } { key-six = choice-b }\\
+
+\\
+% meta keys
+\keys_define:nn { module }
+  {
+    key-seven-one .code:n = some~code\\,
+    key-seven-two .code:n = other~code~with~#1,
+    key-seven .meta:n =
+      {
+        key-seven-one = hi,
+        key-seven-two = #1,
+      }
+  }
+\keys_set:nn { module } { key-seven = val }\\
+\ExplSyntaxOff
+\end{document}

@@ -1,0 +1,21 @@
+\documentclass{article}
+
+\usepackage[draft=false, active, key={val 1}]{kvsample}
+
+\begin{document}
+\makeatletter
+\ifkvsample@active
+  {Active}
+\else
+  {Inactive}
+\fi
+
+\ifkvsample@final
+  {Final}
+\else
+  {Draft}
+\fi
+
+Key stored: \kvsample@key
+\makeatother
+\end{document}
